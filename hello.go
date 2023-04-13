@@ -149,24 +149,3 @@ func getVuelos(client *mongo.Client, ctx context.Context, cancel context.CancelF
 	fmt.Println("return")
 	return cursor
 }
-
-/* 	cursor := getVuelos(client, ctx, cancel)
-
-for cursor.Next(context.TODO()) {
-	var result vuelo
-	if err := cursor.Decode(&result); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%+v\n", result)
-}
-if err := cursor.Err(); err != nil {
-	log.Fatal()
-} */
-
-/*
-	 	router := gin.Default()
-		router.GET("/vuelos", getVuelos)
-		router.POST("/vuelos", postVuelos)
-
-		router.Run("localhost:8080")
-*/
