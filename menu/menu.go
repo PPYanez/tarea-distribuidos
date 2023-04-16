@@ -1,13 +1,14 @@
 package main
 
 import (
-	"context"
-	"distribuidos/tarea-1/db"
 	"distribuidos/tarea-1/models"
+	"encoding/json"
 	"fmt"
-	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 )
 
 func main() {
@@ -74,20 +75,31 @@ func manageReservation() {
 
 func getReservation(pnr string, apellido string) {
 	// Obtener reserva
-	client := db.GetClient()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	url, err := url.Parse("http://localhost:5000/api/reserva")
+	if err != nil {
+		log.Fatal("URL no válida")
+	}
 
-	defer cancel()
+	values := url.Query()
+	values.Add("pnr", pnr)
+	values.Add("apellido", apellido)
 
-	reservaCollection := client.Database("distribuidos").Collection("Reservas")
+	url.RawQuery = values.Encode()
+
+	resp, err := http.Get(url.String())
+	if err != nil {
+		log.Fatal("Reserva no encontrada")
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Reserva no encontrada")
+	}
+
 	var reserva models.Reserva
 
-	filter := bson.M{"pnr": pnr, "pasajeros.apellido": apellido}
-	err := reservaCollection.FindOne(ctx, filter).Decode(&reserva)
-
-	if err != nil {
-		fmt.Println("No se encontró la reserva")
-		return
+	if err := json.Unmarshal(body, &reserva); err != nil {
+		log.Fatal("Respuesta no válida")
 	}
 
 	// Mostrar detalles de vuelos de ida y vuelta
@@ -121,7 +133,7 @@ func getReservation(pnr string, apellido string) {
 				fmt.Print("Ancillaries ida: ")
 				for _, ancillary := range ancillaries.Ida {
 					fmt.Print(
-						fmt.Sprintf("%s", ancillary.Ssr),
+						fmt.Sprintf("%s ", ancillary.Ssr),
 					)
 				}
 				fmt.Println()
@@ -131,7 +143,7 @@ func getReservation(pnr string, apellido string) {
 				fmt.Print("Ancillaries vuelta: ")
 				for _, ancillary := range ancillaries.Vuelta {
 					fmt.Print(
-						fmt.Sprintf("%s", ancillary.Ssr),
+						fmt.Sprintf("%s ", ancillary.Ssr),
 					)
 				}
 				fmt.Println()
