@@ -8,6 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"distribuidos/tarea-1/db"
 	"distribuidos/tarea-1/models"
@@ -29,11 +31,15 @@ func GetVuelo(c *gin.Context) {
 	collection := client.Database("distribuidos").Collection("Vuelos")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	var result models.Vuelo
-
 	defer cancel()
 
-	err := collection.FindOne(ctx, bson.M{"origen": origen, "destino": destino, "fecha": fecha}).Decode(&result)
+	opts := options.Find().SetProjection(bson.D{primitive.E{Key: "ancillaries", Value: 0}})
+
+	cursor, err := collection.Find(
+		ctx,
+		bson.M{"origen": origen, "destino": destino, "fecha": fecha},
+		opts,
+	)
 
 	if err != nil {
 		c.JSON(
@@ -43,19 +49,13 @@ func GetVuelo(c *gin.Context) {
 		return
 	}
 
-	res := []map[string]interface{}{
-		{
-			"numero_vuelo": result.NumeroVuelo,
-			"origen":       result.Origen,
-			"destino":      result.Destino,
-			"hora_salida":  result.HoraSalida,
-			"hora_llegada": result.HoraLlegada,
-			"fecha":        result.Fecha,
-			"avion":        result.Avion,
-		},
+	var results []models.Vuelo
+
+	if err = cursor.All(ctx, &results); err != nil {
+		log.Fatal(err)
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, results)
 }
 
 func PostVuelo(c *gin.Context) {
