@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"distribuidos/tarea-1/db"
 	"distribuidos/tarea-1/models"
@@ -132,4 +133,50 @@ func GetReserva(c *gin.Context) {
 	res := map[string]interface{}{"vuelos": result.Vuelos, "pasajeros": result.Pasajeros}
 
 	c.JSON(http.StatusOK, gin.H{"vuelos": res["vuelos"], "pasajeros": res["pasajeros"]})
+}
+
+func UpdateReserva(c *gin.Context) {
+	// Falta testear
+	client := db.GetClient()
+
+	PNR := c.Query("pnr")
+	apellido := c.Query("apellido")
+
+	if PNR == "" || apellido == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "No se ha ingresado un PNR o apellido"})
+		return
+	}
+
+	collection := client.Database("distribuidos").Collection("Reservas")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	// Bindear JSON a estructura Reserva
+	reemplazo := new(models.Reserva)
+
+	defer cancel()
+
+	if err := c.BindJSON(&reemplazo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err})
+		log.Fatal(err)
+		return
+	}
+
+	defer cancel()
+
+	var result models.Reserva
+	filter := bson.M{"pnr": PNR, "pasajeros.apellido": apellido}
+	update := bson.M{"vuelos": reemplazo.Vuelos, "pasajeros": reemplazo.Pasajeros}
+	err := collection.FindOneAndUpdate(
+		ctx,
+		filter,
+		update,
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	).Decode(&result)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"PNR": result.PNR})
 }
