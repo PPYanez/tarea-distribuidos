@@ -7,22 +7,21 @@ type Reserva struct {
 }
 
 type Pasajero struct {
-	Nombre      string                `json:"nombre,omitempty" bson:"nombre,omitempty"`
-	Apellido    string                `json:"apellido,omitempty" bson:"apellido,omitempty"`
-	Edad        int                   `json:"edad,omitempty" bson:"edad,omitempty"`
-	Ancillaries []Ancillarie_pasajero `json:"ancillaries,omitempty" bson:"ancillaries,omitempty"`
-	Balances    Balance               `json:"balances,omitempty" bson:"balances,omitempty"`
+	Nombre      string               `json:"nombre,omitempty" bson:"nombre,omitempty"`
+	Apellido    string               `json:"apellido,omitempty" bson:"apellido,omitempty"`
+	Edad        int                  `json:"edad,omitempty" bson:"edad,omitempty"`
+	Ancillaries []AncillariePasajero `json:"ancillaries,omitempty" bson:"ancillaries,omitempty"`
+	Balances    Balance              `json:"balances,omitempty" bson:"balances,omitempty"`
 }
 
-type Ancillarie_pasajero struct {
-	Ida []struct {
-		Ssr      string
-		Cantidad int
-	} `json:"ida,omitempty" bson:"ida,omitempty"`
-	Vuelta []struct {
-		Ssr      string
-		Cantidad int
-	} `json:"vuelta,omitempty" bson:"vuelta,omitempty"`
+type AncillariePasajero struct {
+	Ida    []AncillarieDetail `json:"ida,omitempty" bson:"ida,omitempty"`
+	Vuelta []AncillarieDetail `json:"vuelta,omitempty" bson:"vuelta,omitempty"`
+}
+
+type AncillarieDetail struct {
+	Ssr      string `json:"ssr,omitempty" bson:"ssr,omitempty"`
+	Cantidad int    `json:"cantidad,omitempty" bson:"cantidad,omitempty"`
 }
 
 type Balance struct {
@@ -56,5 +55,11 @@ type Avion struct {
 }
 
 type PNR struct {
-	Value string `json:"value,omitempty" bson:"value,omitempty"`
+	Pnr string `json:"pnr,omitempty" bson:"pnr,omitempty"`
+}
+
+type AncillarieData struct {
+	Nombre string `json:"nombre,omitempty" bson:"nombre,omitempty"`
+	Precio int    `json:"precio,omitempty" bson:"precio,omitempty"`
+	Ssr    string `json:"ssr,omitempty" bson:"ssr,omitempty"`
 }

@@ -40,7 +40,7 @@ func GenPNR() models.PNR {
 
 		// check if pnr is new
 		for _, pnrInDB := range existingPNR {
-			if pnrInDB.Value == string(generatedPNR) {
+			if pnrInDB.Pnr == string(generatedPNR) {
 				pnrIsNew = false
 				break
 			}
@@ -51,7 +51,7 @@ func GenPNR() models.PNR {
 		}
 	}
 
-	return models.PNR{Value: string(generatedPNR)}
+	return models.PNR{Pnr: string(generatedPNR)}
 }
 
 func getExistingPNR() []models.PNR {

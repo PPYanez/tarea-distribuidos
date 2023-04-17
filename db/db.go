@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"distribuidos/tarea-1/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -46,4 +47,21 @@ func pingDb(client *mongo.Client) bool {
 
 func GetClient() *mongo.Client {
 	return client
+}
+
+// Static data
+func GetAncillaries() map[string]models.AncillarieData {
+	ancillariesData := map[string]models.AncillarieData{
+		"1": {Nombre: "Equipaje de mano", Precio: 10000, Ssr: "BGH"},
+		"2": {Nombre: "Equipaje de bodega", Precio: 30000, Ssr: "BGR"},
+		"3": {Nombre: "Asiento", Precio: 5000, Ssr: "STDF"},
+		"4": {Nombre: "Embarque y Check In prioritario", Precio: 2000, Ssr: "PAXS"},
+		"5": {Nombre: "Mascota en cabina", Precio: 40000, Ssr: "PTCR"},
+		"6": {Nombre: "Mascota en bodega", Precio: 40000, Ssr: "AVIH"},
+		"7": {Nombre: "Equipaje especial", Precio: 35000, Ssr: "SPML"},
+		"8": {Nombre: "Acceso a Salón VIP", Precio: 15000, Ssr: "LNGE"},
+		"9": {Nombre: "Wi-Fi a bordo", Precio: 20000, Ssr: "WIFI"},
+	}
+
+	return ancillariesData
 }

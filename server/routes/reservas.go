@@ -39,7 +39,7 @@ func PostReserva(c *gin.Context) {
 	payload := models.Reserva{
 		Vuelos:    nueva_reserva.Vuelos,
 		Pasajeros: nueva_reserva.Pasajeros,
-		PNR:       pnrReserva.Value,
+		PNR:       pnrReserva.Pnr,
 	}
 
 	_, err := reservaCollection.InsertOne(ctx, payload)
@@ -56,11 +56,23 @@ func PostReserva(c *gin.Context) {
 		return
 	}
 
-	// Disminuir stock de ancillaries
+	// Disminuir stock de ancillaries y de pasajeros
 	vueloCollection := client.Database("distribuidos").Collection("Vuelos")
 
 	for _, pasajero := range nueva_reserva.Pasajeros {
 		ancillaries_reservados := pasajero.Ancillaries
+
+		vueloCollection.UpdateOne(
+			ctx,
+			bson.M{"numero_vuelo": nueva_reserva.Vuelos[0].NumeroVuelo},
+			bson.M{"$inc": bson.M{"avion.stock_de_pasajeros": -1}},
+		)
+
+		vueloCollection.UpdateOne(
+			ctx,
+			bson.M{"numero_vuelo": nueva_reserva.Vuelos[1].NumeroVuelo},
+			bson.M{"$inc": bson.M{"avion.stock_de_pasajeros": -1}},
+		)
 
 		for _, ancillaries := range ancillaries_reservados {
 			if ancillaries.Ida != nil {
@@ -85,7 +97,7 @@ func PostReserva(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"PNR": pnrReserva.Value})
+	c.JSON(http.StatusCreated, gin.H{"PNR": pnrReserva.Pnr})
 }
 
 func GetReserva(c *gin.Context) {
