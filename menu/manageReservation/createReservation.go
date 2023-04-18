@@ -62,7 +62,12 @@ func createReservation(fechaIda string, fechaVuelta string, origen string, desti
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("Error al recibir respuesta del servidor")
+		log.Fatal("Error del servidor al crear la reserva")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Fatal("Error del servidor al crear la reserva")
+		return
 	}
 
 	var reservaResponse models.PNR
