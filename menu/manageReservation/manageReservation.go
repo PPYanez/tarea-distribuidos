@@ -53,6 +53,19 @@ func ManageReservation() {
 			getReservation(pnr, apellido)
 		}
 
+		if option == 3 {
+			var pnr string
+			var apellido string
+
+			fmt.Print("Ingrese el PNR: ")
+			fmt.Scanln(&pnr)
+
+			fmt.Print("Ingrese el apellido: ")
+			fmt.Scanln(&apellido)
+
+			updateReservation(pnr, apellido)
+		}
+
 		if option == 4 {
 			keepRunning = false
 		}
