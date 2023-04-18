@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func ManageReservation() {
+func ManageReservationMenu() {
 	var keepRunning = true
 
 	for keepRunning {
@@ -37,7 +37,7 @@ func ManageReservation() {
 			fmt.Print("Ingrese la cantidad de pasajeros: ")
 			fmt.Scanln(&cantidadPasajeros)
 
-			createReservation(fechaIda, fechaVuelta, origen, destino, cantidadPasajeros)
+			createReservationMenu(fechaIda, fechaVuelta, origen, destino, cantidadPasajeros)
 		}
 
 		if option == 2 {
@@ -50,7 +50,7 @@ func ManageReservation() {
 			fmt.Print("Ingrese el apellido: ")
 			fmt.Scanln(&apellido)
 
-			getReservation(pnr, apellido)
+			getReservationMenu(pnr, apellido)
 		}
 
 		if option == 3 {
@@ -63,7 +63,7 @@ func ManageReservation() {
 			fmt.Print("Ingrese el apellido: ")
 			fmt.Scanln(&apellido)
 
-			updateReservation(pnr, apellido)
+			updateReservationMenu(pnr, apellido)
 		}
 
 		if option == 4 {

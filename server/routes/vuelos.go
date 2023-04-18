@@ -75,9 +75,7 @@ func UpdateStock(c *gin.Context) {
 	}
 
 	// Bindear JSON a estructura newStock
-	newStock := new(struct {
-		Stock int `json:"stock_de_pasajeros" bson:"stock_de_pasajeros"`
-	})
+	newStock := new(models.Stock)
 
 	if err := c.BindJSON(&newStock); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "JSON incorrecto"})
@@ -85,7 +83,8 @@ func UpdateStock(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("newStock: ", newStock)
+	fmt.Printf("---%+v---\n", newStock)
+
 	// Actualizar stock en la base de datos
 	filter := bson.M{"numero_vuelo": numero_vuelo, "origen": origen, "destino": destino, "fecha": fecha}
 	update := bson.M{"$set": bson.M{"avion.stock_de_pasajeros": newStock.Stock}}
@@ -111,8 +110,6 @@ func UpdateStock(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error al obtener el vuelo actualizado"})
 		return
 	}
-
-	fmt.Println("result: ", result)
 
 	c.JSON(http.StatusOK, gin.H{
 		"numero_vuelo": result.NumeroVuelo,

@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func createReservation(fechaIda string, fechaVuelta string, origen string, destino string, cantidadPasajeros int) {
+func createReservationMenu(fechaIda string, fechaVuelta string, origen string, destino string, cantidadPasajeros int) {
 	// Seleccionar vuelos
 	fmt.Println("Vuelos disponibles:")
 	vuelos, precioPasajeIda, precioPasajeVuelta := chooseVuelos(fechaIda, fechaVuelta, origen, destino)
@@ -65,7 +65,7 @@ func createReservation(fechaIda string, fechaVuelta string, origen string, desti
 		log.Fatal("Error del servidor al crear la reserva")
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated {
 		log.Fatal("Error del servidor al crear la reserva")
 		return
 	}

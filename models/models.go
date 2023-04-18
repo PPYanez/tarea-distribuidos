@@ -63,3 +63,7 @@ type AncillarieData struct {
 	Precio int    `json:"precio,omitempty" bson:"precio,omitempty"`
 	Ssr    string `json:"ssr,omitempty" bson:"ssr,omitempty"`
 }
+
+type Stock struct {
+	Stock int `json:"stock_de_pasajeros" bson:"stock_de_pasajeros"`
+}

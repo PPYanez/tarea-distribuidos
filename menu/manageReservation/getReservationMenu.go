@@ -11,7 +11,7 @@ import (
 )
 
 // Obtener reserva mostrando los datos necesarios para el menú
-func getReservation(pnr string, apellido string) {
+func getReservationMenu(pnr string, apellido string) {
 	queries := map[string]string{
 		"pnr":      pnr,
 		"apellido": apellido,
@@ -86,7 +86,7 @@ func getReservation(pnr string, apellido string) {
 }
 
 // Obtener reserva, pero sin prints
-func discreteGetReservation(pnr string, apellido string) *models.Reserva {
+func discreteGetReservation(pnr string, apellido string) models.Reserva {
 	queries := map[string]string{
 		"pnr":      pnr,
 		"apellido": apellido,
@@ -96,18 +96,21 @@ func discreteGetReservation(pnr string, apellido string) *models.Reserva {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil
+		log.Fatal("Reserva no encontrada")
+		return models.Reserva{}
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil
+		log.Fatal("Reserva no encontrada")
+		return models.Reserva{}
 	}
 
 	var reserva models.Reserva
 	if err := json.Unmarshal(body, &reserva); err != nil {
-		return nil
+		log.Fatal("Reserva no encontrada")
+		return models.Reserva{}
 	}
 
-	return &reserva
+	return reserva
 }

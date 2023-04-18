@@ -20,7 +20,7 @@ func main() {
 		fmt.Scanln(&option)
 
 		if option == 1 {
-			menu.ManageReservation()
+			menu.ManageReservationMenu()
 		}
 
 		if option == 3 {
