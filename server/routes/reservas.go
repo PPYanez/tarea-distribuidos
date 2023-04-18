@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"distribuidos/tarea-1/db"
 	"distribuidos/tarea-1/models"
@@ -136,7 +135,6 @@ func GetReserva(c *gin.Context) {
 }
 
 func UpdateReserva(c *gin.Context) {
-	// Falta testear
 	client := db.GetClient()
 
 	PNR := c.Query("pnr")
@@ -161,22 +159,27 @@ func UpdateReserva(c *gin.Context) {
 		return
 	}
 
-	defer cancel()
+	reemplazo.PNR = PNR
 
-	var result models.Reserva
+	// Actualizar reserva
 	filter := bson.M{"pnr": PNR, "pasajeros.apellido": apellido}
-	update := bson.M{"vuelos": reemplazo.Vuelos, "pasajeros": reemplazo.Pasajeros}
-	err := collection.FindOneAndUpdate(
+	update := bson.M{"$set": reemplazo}
+
+	resp, err := collection.UpdateOne(
 		ctx,
 		filter,
 		update,
-		options.FindOneAndUpdate().SetReturnDocument(options.After),
-	).Decode(&result)
+	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "No se pudo actualizar la reserva"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"PNR": result.PNR})
+	if resp.MatchedCount == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "La reserva requerida no existe"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"PNR": PNR})
 }
