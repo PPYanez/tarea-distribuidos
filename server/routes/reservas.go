@@ -165,11 +165,7 @@ func UpdateReserva(c *gin.Context) {
 	filter := bson.M{"pnr": PNR, "pasajeros.apellido": apellido}
 	update := bson.M{"$set": reemplazo}
 
-	resp, err := collection.UpdateOne(
-		ctx,
-		filter,
-		update,
-	)
+	resp, err := collection.UpdateOne(ctx, filter, update)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "No se pudo actualizar la reserva"})

@@ -16,6 +16,7 @@ func main() {
 
 	router.GET("/api/vuelo", routes.GetVuelo)
 	router.POST("/api/vuelo", routes.PostVuelo)
+	router.PUT("/api/vuelo", routes.UpdateStock)
 
 	router.Run("localhost:5000")
 }
