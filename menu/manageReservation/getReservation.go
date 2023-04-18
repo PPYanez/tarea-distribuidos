@@ -2,28 +2,24 @@ package menu
 
 import (
 	"distribuidos/tarea-1/models"
+	"distribuidos/tarea-1/utilities"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 )
 
+// Obtener reserva mostrando los datos necesarios para el menú
 func getReservation(pnr string, apellido string) {
-	// Obtener reserva
-	url, err := url.Parse("http://localhost:5000/api/reserva")
-	if err != nil {
-		log.Fatal("URL no válida")
+	queries := map[string]string{
+		"pnr":      pnr,
+		"apellido": apellido,
 	}
 
-	values := url.Query()
-	values.Add("pnr", pnr)
-	values.Add("apellido", apellido)
+	url := utilities.CreateUrl("reserva", queries)
 
-	url.RawQuery = values.Encode()
-
-	resp, err := http.Get(url.String())
+	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal("Reserva no encontrada")
 	}
@@ -87,4 +83,31 @@ func getReservation(pnr string, apellido string) {
 			}
 		}
 	}
+}
+
+// Obtener reserva, pero sin prints
+func discreteGetReservation(pnr string, apellido string) *models.Reserva {
+	queries := map[string]string{
+		"pnr":      pnr,
+		"apellido": apellido,
+	}
+
+	url := utilities.CreateUrl("reserva", queries)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil
+	}
+
+	var reserva models.Reserva
+	if err := json.Unmarshal(body, &reserva); err != nil {
+		return nil
+	}
+
+	return &reserva
 }
