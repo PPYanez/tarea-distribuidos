@@ -44,9 +44,7 @@ func getReservationMenu(pnr string, apellido string) {
 			seccion = "Vuelta"
 		}
 
-		fmt.Print(
-			fmt.Sprintf("%s:\n %s %s %s\n", seccion, vuelo.NumeroVuelo, vuelo.HoraSalida, vuelo.HoraLlegada),
-		)
+		fmt.Printf("%s:\n %s %s %s\n", seccion, vuelo.NumeroVuelo, vuelo.HoraSalida, vuelo.HoraLlegada)
 	}
 
 	// Mostrar detalle de pasajeros
@@ -56,18 +54,14 @@ func getReservationMenu(pnr string, apellido string) {
 
 	for _, pasajero := range reserva.Pasajeros {
 		// Datos personales
-		fmt.Print(
-			fmt.Sprintf("%s %d\n", pasajero.Nombre, pasajero.Edad),
-		)
+		fmt.Printf("%s %d\n", pasajero.Nombre, pasajero.Edad)
 
 		// Ancillaries
 		for _, ancillaries := range pasajero.Ancillaries {
 			if ancillaries.Ida != nil {
 				fmt.Print("Ancillaries ida: ")
 				for _, ancillary := range ancillaries.Ida {
-					fmt.Print(
-						fmt.Sprintf("%s ", ancillary.Ssr),
-					)
+					fmt.Printf("%s ", ancillary.Ssr)
 				}
 				fmt.Println()
 			}
@@ -75,9 +69,7 @@ func getReservationMenu(pnr string, apellido string) {
 			if ancillaries.Vuelta != nil {
 				fmt.Print("Ancillaries vuelta: ")
 				for _, ancillary := range ancillaries.Vuelta {
-					fmt.Print(
-						fmt.Sprintf("%s ", ancillary.Ssr),
-					)
+					fmt.Printf("%s ", ancillary.Ssr)
 				}
 				fmt.Println()
 			}

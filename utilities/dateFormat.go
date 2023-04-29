@@ -4,6 +4,7 @@ import "strings"
 
 func DateFormat(date string) string {
 	separated := strings.Split(date, "/")
+	separated[2] = "20" + separated[2]
 	formatted := strings.Join(reverseSlice(separated), "-")
 
 	return formatted

@@ -7,7 +7,7 @@ import (
 )
 
 func CalculateFlightPrice(vuelo models.Vuelo) int {
-	// DD/MM/YYYY -> YYYY-MM-DD
+	// DD/MM/YY -> YYYY-MM-DD
 	date := DateFormat(vuelo.Fecha)
 
 	salida, _ := time.Parse(

@@ -14,6 +14,7 @@ func ManageReservationMenu() {
 			"2. Obtener reserva\n",
 			"3. Modificar reserva\n",
 			"4. Volver al menú principal\n",
+			"Ingrese una opción: ",
 		)
 
 		var option int
@@ -53,19 +54,18 @@ func ManageReservationMenu() {
 			getReservationMenu(pnr, apellido)
 		}
 
-		// // WIP
-		// if option == 3 {
-		// 	var pnr string
-		// 	var apellido string
+		if option == 3 {
+			var pnr string
+			var apellido string
 
-		// 	fmt.Print("Ingrese el PNR: ")
-		// 	fmt.Scanln(&pnr)
+			fmt.Print("Ingrese el PNR: ")
+			fmt.Scanln(&pnr)
 
-		// 	fmt.Print("Ingrese el apellido: ")
-		// 	fmt.Scanln(&apellido)
+			fmt.Print("Ingrese el apellido: ")
+			fmt.Scanln(&apellido)
 
-		// 	updateReservationMenu(pnr, apellido)
-		// }
+			updateReservationMenu(pnr, apellido)
+		}
 
 		if option == 4 {
 			keepRunning = false

@@ -62,24 +62,25 @@ func updateReservationMenu(pnr string, apellido string) {
 		}
 
 		if option == 2 {
-			var choice string
-			fmt.Print("Ingrese el PNR: ")
-			fmt.Scanln(&choice)
-			fmt.Print("Ingrese el apellido: ")
-			fmt.Scanln(&choice)
+			fmt.Println("No alcanzamos a programar esta parte, pero el put funciona bien :-(")
+			// var choice string
+			// fmt.Print("Ingrese el PNR: ")
+			// fmt.Scanln(&choice)
+			// fmt.Print("Ingrese el apellido: ")
+			// fmt.Scanln(&choice)
 
-			fmt.Println("Vuelos:")
-			for i, v := range originalReservation.Vuelos {
-				fmt.Printf("%d. %s %s - %s\n", i+1, v.NumeroVuelo, v.HoraSalida, v.HoraLlegada)
-			}
+			// fmt.Println("Vuelos:")
+			// for i, v := range originalReservation.Vuelos {
+			// 	fmt.Printf("%d. %s %s - %s\n", i+1, v.NumeroVuelo, v.HoraSalida, v.HoraLlegada)
+			// }
 
-			var vueloToReplace int
-			fmt.Print("Ingrese una opción: ")
-			fmt.Scanln(&vueloToReplace)
-			replaceObject := originalReservation.Vuelos[vueloToReplace-1]
+			// var vueloToReplace int
+			// fmt.Print("Ingrese una opción: ")
+			// fmt.Scanln(&vueloToReplace)
+			// replaceObject := originalReservation.Vuelos[vueloToReplace-1]
 
-			fmt.Println(replaceObject.Origen, replaceObject.Destino, replaceObject.HoraSalida, replaceObject.HoraLlegada, replaceObject.NumeroVuelo)
-			fmt.Println(replaceObject.Ancillaries)
+			// fmt.Println(replaceObject.Origen, replaceObject.Destino, replaceObject.HoraSalida, replaceObject.HoraLlegada, replaceObject.NumeroVuelo)
+			// fmt.Println(replaceObject.Ancillaries)
 		}
 	}
 }

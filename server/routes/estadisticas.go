@@ -51,7 +51,7 @@ func RouteEarningStatistics(ctx *gin.Context, comprasCollection *mongo.Collectio
 
 	sortStage := bson.D{
 		{Key: "$sort", Value: bson.D{
-			{Key: "total_pasajes", Value: -1},
+			{Key: "total_pasajes", Value: 1},
 		}},
 	}
 
@@ -60,9 +60,11 @@ func RouteEarningStatistics(ctx *gin.Context, comprasCollection *mongo.Collectio
 
 		{Key: "ida_min", Value: bson.D{{Key: "$first", Value: "$_id.ida"}}},
 		{Key: "vuelta_min", Value: bson.D{{Key: "$first", Value: "$_id.vuelta"}}},
+		{Key: "total_pasajes_min", Value: bson.D{{Key: "$first", Value: "$total_pasajes"}}},
 
 		{Key: "ida_max", Value: bson.D{{Key: "$last", Value: "$_id.ida"}}},
 		{Key: "vuelta_max", Value: bson.D{{Key: "$last", Value: "$_id.vuelta"}}},
+		{Key: "total_pasajes_max", Value: bson.D{{Key: "$last", Value: "$total_pasajes"}}},
 	}}}
 
 	pipeline := mongo.Pipeline{groupStage, sortStage, secondGroupStage}
@@ -128,6 +130,9 @@ func AncillariesRankingStatistic(c *gin.Context, reservasCollection *mongo.Colle
 
 			for _, ancillarie := range ancillariesIda {
 				ancillarieIndex := indexAncillarie(ancillarie, ancillaries)
+				if ancillarieIndex == -1 {
+					fmt.Println(pasajero)
+				}
 				totalEarnedPerAncillarie[ancillarieIndex-1].Ganancia += ancillarie.Cantidad * getAncillariePrice(ancillarie)
 			}
 
@@ -137,6 +142,9 @@ func AncillariesRankingStatistic(c *gin.Context, reservasCollection *mongo.Colle
 
 				for _, ancillarie := range ancillariesVuelta {
 					ancillarieIndex := indexAncillarie(ancillarie, ancillaries)
+					if ancillarieIndex == -1 {
+						fmt.Println(pasajero)
+					}
 					totalEarnedPerAncillarie[ancillarieIndex-1].Ganancia += ancillarie.Cantidad * getAncillariePrice(ancillarie)
 				}
 			}
@@ -154,6 +162,8 @@ func indexAncillarie(ancillarieObject models.AncillarieDetail, ancillaries map[s
 		}
 	}
 
+	fmt.Println(ancillarieObject)
+	fmt.Println("----------------------------")
 	return -1
 }
 

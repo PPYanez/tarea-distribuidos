@@ -15,6 +15,7 @@ func main() {
 			"1. Gestionar reserva\n",
 			"2. Obtener estadísticas\n",
 			"3. Salir\n",
+			"Ingrese una opción: ",
 		)
 
 		var option int

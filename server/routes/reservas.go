@@ -69,7 +69,7 @@ func PostReserva(c *gin.Context) {
 	compra := models.Compra{
 		Origen:            nuevaReserva.Vuelos[0].Origen,
 		Destino:           nuevaReserva.Vuelos[0].Destino,
-		TotalPasajes:      totalPasajesIda,
+		TotalPasajes:      totalPasajesIda + totalPasajesVuelta,
 		CantidadPasajeros: len(nuevaReserva.Pasajeros),
 		FechaVuelo:        nuevaReserva.Vuelos[0].Fecha,
 	}
@@ -84,7 +84,7 @@ func PostReserva(c *gin.Context) {
 		compra = models.Compra{
 			Origen:            nuevaReserva.Vuelos[1].Origen,
 			Destino:           nuevaReserva.Vuelos[1].Destino,
-			TotalPasajes:      totalPasajesVuelta,
+			TotalPasajes:      totalPasajesIda + totalPasajesVuelta,
 			CantidadPasajeros: len(nuevaReserva.Pasajeros),
 			FechaVuelo:        nuevaReserva.Vuelos[1].Fecha,
 		}
