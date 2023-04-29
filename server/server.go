@@ -15,7 +15,6 @@ func main() {
 	router.PUT("/api/reserva", routes.UpdateReserva)
 
 	router.GET("/api/vuelo", routes.GetVuelo)
-	router.POST("/api/vuelo", routes.PostVuelo)
 	router.PUT("/api/vuelo", routes.UpdateStock)
 
 	router.GET("/api/estadisticas", routes.GetEstadisticas)
