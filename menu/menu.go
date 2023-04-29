@@ -1,7 +1,8 @@
 package main
 
 import (
-	menu "distribuidos/tarea-1/menu/manageReservation"
+	statisticsMenu "distribuidos/tarea-1/menu/getStatistics"
+	manageMenu "distribuidos/tarea-1/menu/manageReservation"
 	"fmt"
 )
 
@@ -20,7 +21,11 @@ func main() {
 		fmt.Scanln(&option)
 
 		if option == 1 {
-			menu.ManageReservationMenu()
+			manageMenu.ManageReservationMenu()
+		}
+
+		if option == 2 {
+			statisticsMenu.GetStatisticsMenu()
 		}
 
 		if option == 3 {

@@ -20,7 +20,7 @@ func createReservationMenu(fechaIda string, fechaVuelta string, origen string, d
 	vuelos, precioPasajeIda, precioPasajeVuelta := chooseVuelos(fechaIda, fechaVuelta, origen, destino)
 
 	// Ingresar pasajeros
-	pasajeros := setPassengersInfo(cantidadPasajeros)
+	pasajeros := setPassengersInfo(cantidadPasajeros, len(vuelos) > 1)
 
 	// Actualizar balances con precio de pasajes y obtener costo total
 	var costoTotal int
@@ -28,8 +28,8 @@ func createReservationMenu(fechaIda string, fechaVuelta string, origen string, d
 		pasajeros[i].Balances.VueloIda = precioPasajeIda
 		pasajeros[i].Balances.VueloVuelta = precioPasajeVuelta
 
-		costoTotal += pasajeros[i].Balances.VueloIda +
-			pasajeros[i].Balances.VueloVuelta +
+		costoTotal += precioPasajeIda +
+			precioPasajeVuelta +
 			pasajeros[i].Balances.AncillariesIda +
 			pasajeros[i].Balances.AncillariesVuelta
 	}
@@ -77,7 +77,7 @@ func createReservationMenu(fechaIda string, fechaVuelta string, origen string, d
 	}
 
 	fmt.Println("La reserva fue generada, el PNR es:", reservaResponse.Pnr)
-	fmt.Println(fmt.Sprintf("El costo total de la reserva fué de $%d", costoTotal))
+	fmt.Printf("El costo total de la reserva fué de $%d\n", costoTotal)
 }
 
 func chooseVuelos(fechaIda string, fechaVuelta string, origen string, destino string) ([]models.Vuelo, int, int) {
@@ -90,15 +90,22 @@ func chooseVuelos(fechaIda string, fechaVuelta string, origen string, destino st
 	}
 
 	// Vuelos de vuelta
-	fmt.Println("Vuelta:")
-	vueloVuelta, precioPasajeVuelta, err := chooseVuelo(destino, origen, fechaVuelta)
-	if err != nil {
-		fmt.Println("No se encontraron vuelos de vuelta, se reservará solo el vuelo de ida")
+	var vueloVuelta *models.Vuelo
+	var precioPasajeVuelta int
+
+	if fechaVuelta != "no" {
+		fmt.Println("Vuelta:")
+		vueloVuelta, precioPasajeVuelta, err = chooseVuelo(destino, origen, fechaVuelta)
+		if err != nil {
+			fmt.Println("No se encontraron vuelos de vuelta, se reservará solo el vuelo de ida")
+		}
 	}
 
 	var vuelosReserva []models.Vuelo
 	vuelosReserva = append(vuelosReserva, *vueloIda)
-	vuelosReserva = append(vuelosReserva, *vueloVuelta)
+	if vueloVuelta != nil {
+		vuelosReserva = append(vuelosReserva, *vueloVuelta)
+	}
 
 	return vuelosReserva, precioPasajeIda, precioPasajeVuelta
 }
@@ -114,21 +121,19 @@ func chooseVuelo(origen string, destino string, fecha string) (*models.Vuelo, in
 	url := utilities.CreateUrl("vuelo", queries)
 	vuelos := requestVuelos(url)
 	var vuelo models.Vuelo
+	var choice int
 
 	if len(vuelos) > 0 {
 		// Mostrar opciones
 		showVuelos(vuelos)
 
-		// Reservar ida
 		fmt.Println("Ingrese una opción: ")
-
-		var ida int
-		fmt.Scanln(&ida)
-		vuelo = vuelos[ida-1]
+		fmt.Scanln(&choice)
 	} else {
-		return nil, 0, fmt.Errorf("No se encontraron vuelos")
+		return nil, 0, fmt.Errorf("no se encontraron vuelos")
 	}
 
+	vuelo = vuelos[choice-1]
 	precioPasaje := utilities.CalculateFlightPrice(vuelo)
 
 	return &vuelo, precioPasaje, nil
@@ -158,26 +163,24 @@ func showVuelos(vuelos []models.Vuelo) {
 	for _, vuelo := range vuelos {
 		precioPasaje := utilities.CalculateFlightPrice(vuelo)
 
-		fmt.Println(
-			fmt.Sprintf("%s %s %s $%d", vuelo.NumeroVuelo, vuelo.HoraSalida, vuelo.HoraLlegada, precioPasaje),
-		)
+		fmt.Printf("%s %s %s $%d\n", vuelo.NumeroVuelo, vuelo.HoraSalida, vuelo.HoraLlegada, precioPasaje)
 	}
 }
 
-func setPassengersInfo(cantidadPasajeros int) []models.Pasajero {
+func setPassengersInfo(cantidadPasajeros int, vueloConVuelta bool) []models.Pasajero {
 	pasajeros := make([]models.Pasajero, cantidadPasajeros)
 
 	for i := 0; i < cantidadPasajeros; i++ {
-		fmt.Println(fmt.Sprintf("%s %d%s", "Pasajero", i+1, ":"))
+		fmt.Printf("Pasajero %d:\n", i+1)
 
-		pasajero := setPassengerInfo()
+		pasajero := setPassengerInfo(vueloConVuelta)
 		pasajeros[i] = pasajero
 	}
 
 	return pasajeros
 }
 
-func setPassengerInfo() models.Pasajero {
+func setPassengerInfo(vueloConVuelta bool) models.Pasajero {
 	nombre, apellido, edad := getPassengerData()
 	ancillariesData := db.GetAncillaries()
 
@@ -187,22 +190,40 @@ func setPassengerInfo() models.Pasajero {
 	ancillariesIda, totalAncillariesIda := chooseAncillaries(ancillariesData)
 	fmt.Println("Total ancillaries: ", totalAncillariesIda)
 
-	fmt.Println("Ancillaries de vuelta:")
-	showAncillaries(ancillariesData)
+	var selectedAncillaries []models.AncillariePasajero
+	var balances models.Balance
 
-	ancillariesVuelta, totalAncillariesVuelta := chooseAncillaries(ancillariesData)
-	fmt.Println("Total ancillaries: ", totalAncillariesVuelta)
+	if vueloConVuelta {
+		fmt.Println("Ancillaries de vuelta:")
+		showAncillaries(ancillariesData)
 
-	selectedAncillaries := []models.AncillariePasajero{
-		{
-			Ida:    ancillariesIda,
-			Vuelta: ancillariesVuelta,
-		},
-	}
+		ancillariesVuelta, totalAncillariesVuelta := chooseAncillaries(ancillariesData)
+		fmt.Println("Total ancillaries: ", totalAncillariesVuelta)
 
-	balances := models.Balance{
-		AncillariesIda:    totalAncillariesIda,
-		AncillariesVuelta: totalAncillariesVuelta,
+		selectedAncillaries = []models.AncillariePasajero{
+			{
+				Ida: ancillariesIda,
+			},
+			{
+				Vuelta: ancillariesVuelta,
+			},
+		}
+
+		balances = models.Balance{
+			AncillariesIda:    totalAncillariesIda,
+			AncillariesVuelta: totalAncillariesVuelta,
+		}
+
+	} else {
+		selectedAncillaries = []models.AncillariePasajero{
+			{
+				Ida: ancillariesIda,
+			},
+		}
+
+		balances = models.Balance{
+			AncillariesIda: totalAncillariesIda,
+		}
 	}
 
 	return models.Pasajero{

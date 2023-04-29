@@ -15,6 +15,14 @@ func updateReservationMenu(pnr string, apellido string) {
 	keepRunning := true
 
 	for keepRunning {
+		// Obtener reserva con los datos ingresados
+		originalReservation := discreteGetReservation(pnr, apellido)
+
+		if len(originalReservation.Pasajeros) == 0 && len(originalReservation.Vuelos) == 0 {
+			fmt.Println("Reserva no encontrada, ¿seguro que ingresó los datos correctos?")
+			break
+		}
+
 		fmt.Println(
 			"Opciones:\n",
 			"1. Cambiar fecha de vuelo\n",
@@ -28,14 +36,6 @@ func updateReservationMenu(pnr string, apellido string) {
 
 		if option == 3 {
 			keepRunning = false
-			break
-		}
-
-		// Obtener reserva con los datos ingresados
-		originalReservation := discreteGetReservation(pnr, apellido)
-
-		if len(originalReservation.Pasajeros) == 0 && len(originalReservation.Vuelos) == 0 {
-			log.Fatal("Reserva no encontrada")
 			break
 		}
 
@@ -60,6 +60,27 @@ func updateReservationMenu(pnr string, apellido string) {
 			updateReservation(pnr, apellido, updatedReservation)
 			updateStocks(updatedReservation, updatedReservation.Vuelos[vueloToReplace], originalReservation.Vuelos[vueloToReplace])
 		}
+
+		if option == 2 {
+			var choice string
+			fmt.Print("Ingrese el PNR: ")
+			fmt.Scanln(&choice)
+			fmt.Print("Ingrese el apellido: ")
+			fmt.Scanln(&choice)
+
+			fmt.Println("Vuelos:")
+			for i, v := range originalReservation.Vuelos {
+				fmt.Printf("%d. %s %s - %s\n", i+1, v.NumeroVuelo, v.HoraSalida, v.HoraLlegada)
+			}
+
+			var vueloToReplace int
+			fmt.Print("Ingrese una opción: ")
+			fmt.Scanln(&vueloToReplace)
+			replaceObject := originalReservation.Vuelos[vueloToReplace-1]
+
+			fmt.Println(replaceObject.Origen, replaceObject.Destino, replaceObject.HoraSalida, replaceObject.HoraLlegada, replaceObject.NumeroVuelo)
+			fmt.Println(replaceObject.Ancillaries)
+		}
 	}
 }
 
@@ -71,7 +92,7 @@ func changeFlightDate(reserva models.Reserva, vueloToReplace int, pnr string, ap
 	fmt.Print("Ingrese nueva fecha: ")
 	fmt.Scanln(&newDate)
 
-	vuelos := getVuelos(vuelo, newDate)
+	vuelos := findVuelos(vuelo.Origen, vuelo.Destino, newDate)
 	if len(vuelos) == 0 {
 		return models.Reserva{}, fmt.Errorf("No hay vuelos disponibles para la nueva fecha")
 	}
@@ -96,10 +117,10 @@ func changeFlightDate(reserva models.Reserva, vueloToReplace int, pnr string, ap
 	return newReserva, nil
 }
 
-func getVuelos(vuelo models.Vuelo, newDate string) []models.Vuelo {
+func findVuelos(origen string, destino string, newDate string) []models.Vuelo {
 	queries := map[string]string{
-		"origen":  vuelo.Origen,
-		"destino": vuelo.Destino,
+		"origen":  origen,
+		"destino": destino,
 		"fecha":   newDate,
 	}
 	url := utilities.CreateUrl("vuelo", queries)

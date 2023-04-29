@@ -21,11 +21,11 @@ func PostReserva(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	// Bindear JSON a estructura Reserva
-	nueva_reserva := new(models.Reserva)
+	nuevaReserva := new(models.Reserva)
 
 	defer cancel()
 
-	if err := c.BindJSON(&nueva_reserva); err != nil {
+	if err := c.BindJSON(&nuevaReserva); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err})
 		log.Fatal(err)
 		return
@@ -37,8 +37,8 @@ func PostReserva(c *gin.Context) {
 	pnrReserva := utilities.GenPNR()
 
 	payload := models.Reserva{
-		Vuelos:    nueva_reserva.Vuelos,
-		Pasajeros: nueva_reserva.Pasajeros,
+		Vuelos:    nuevaReserva.Vuelos,
+		Pasajeros: nuevaReserva.Pasajeros,
 		PNR:       pnrReserva.Pnr,
 	}
 
@@ -56,40 +56,81 @@ func PostReserva(c *gin.Context) {
 		return
 	}
 
+	// Guardar ruta en la base de datos (para facilitar estadísticas)
+	comprasCollection := client.Database("distribuidos").Collection("Compras")
+	totalPasajesIda := 0
+	totalPasajesVuelta := 0
+
+	for _, pasajero := range nuevaReserva.Pasajeros {
+		totalPasajesIda += pasajero.Balances.VueloIda
+		totalPasajesVuelta += pasajero.Balances.VueloVuelta
+	}
+
+	compra := models.Compra{
+		Origen:            nuevaReserva.Vuelos[0].Origen,
+		Destino:           nuevaReserva.Vuelos[0].Destino,
+		TotalPasajes:      totalPasajesIda,
+		CantidadPasajeros: len(nuevaReserva.Pasajeros),
+		FechaVuelo:        nuevaReserva.Vuelos[0].Fecha,
+	}
+
+	_, err = comprasCollection.InsertOne(ctx, compra)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		return
+	}
+
+	if len(nuevaReserva.Vuelos) > 1 {
+		compra = models.Compra{
+			Origen:            nuevaReserva.Vuelos[1].Origen,
+			Destino:           nuevaReserva.Vuelos[1].Destino,
+			TotalPasajes:      totalPasajesVuelta,
+			CantidadPasajeros: len(nuevaReserva.Pasajeros),
+			FechaVuelo:        nuevaReserva.Vuelos[1].Fecha,
+		}
+		_, err = comprasCollection.InsertOne(ctx, compra)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+			return
+		}
+	}
+
 	// Disminuir stock de ancillaries y de pasajeros
 	vueloCollection := client.Database("distribuidos").Collection("Vuelos")
 
-	for _, pasajero := range nueva_reserva.Pasajeros {
-		ancillaries_reservados := pasajero.Ancillaries
+	for _, pasajero := range nuevaReserva.Pasajeros {
+		ancillariesReservados := pasajero.Ancillaries
 
 		vueloCollection.UpdateOne(
 			ctx,
-			bson.M{"numero_vuelo": nueva_reserva.Vuelos[0].NumeroVuelo},
+			bson.M{"numero_vuelo": nuevaReserva.Vuelos[0].NumeroVuelo},
 			bson.M{"$inc": bson.M{"avion.stock_de_pasajeros": -1}},
 		)
 
-		vueloCollection.UpdateOne(
-			ctx,
-			bson.M{"numero_vuelo": nueva_reserva.Vuelos[1].NumeroVuelo},
-			bson.M{"$inc": bson.M{"avion.stock_de_pasajeros": -1}},
-		)
+		if len(nuevaReserva.Vuelos) > 1 {
+			vueloCollection.UpdateOne(
+				ctx,
+				bson.M{"numero_vuelo": nuevaReserva.Vuelos[1].NumeroVuelo},
+				bson.M{"$inc": bson.M{"avion.stock_de_pasajeros": -1}},
+			)
+		}
 
-		for _, ancillaries := range ancillaries_reservados {
+		for _, ancillaries := range ancillariesReservados {
 			if ancillaries.Ida != nil {
 				for _, ancillary_ida := range ancillaries.Ida {
 					vueloCollection.UpdateOne(
 						ctx,
-						bson.M{"numero_vuelo": nueva_reserva.Vuelos[0].NumeroVuelo, "ancillaries.ssr": ancillary_ida.Ssr},
+						bson.M{"numero_vuelo": nuevaReserva.Vuelos[0].NumeroVuelo, "ancillaries.ssr": ancillary_ida.Ssr},
 						bson.M{"$inc": bson.M{"ancillaries.$.stock": -1 * ancillary_ida.Cantidad}},
 					)
 				}
 			}
 
-			if ancillaries.Vuelta != nil {
+			if ancillaries.Vuelta != nil && len(nuevaReserva.Vuelos) > 1 {
 				for _, ancillary_vuelta := range ancillaries.Vuelta {
 					vueloCollection.UpdateOne(
 						ctx,
-						bson.M{"numero_vuelo": nueva_reserva.Vuelos[1].NumeroVuelo, "ancillaries.ssr": ancillary_vuelta.Ssr},
+						bson.M{"numero_vuelo": nuevaReserva.Vuelos[1].NumeroVuelo, "ancillaries.ssr": ancillary_vuelta.Ssr},
 						bson.M{"$inc": bson.M{"ancillaries.$.stock": -1 * ancillary_vuelta.Cantidad}},
 					)
 				}

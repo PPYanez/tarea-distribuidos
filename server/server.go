@@ -18,5 +18,7 @@ func main() {
 	router.POST("/api/vuelo", routes.PostVuelo)
 	router.PUT("/api/vuelo", routes.UpdateStock)
 
+	router.GET("/api/estadisticas", routes.GetEstadisticas)
+
 	router.Run("localhost:5000")
 }

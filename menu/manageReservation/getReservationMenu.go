@@ -96,19 +96,16 @@ func discreteGetReservation(pnr string, apellido string) models.Reserva {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal("Reserva no encontrada")
 		return models.Reserva{}
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("Reserva no encontrada")
 		return models.Reserva{}
 	}
 
 	var reserva models.Reserva
 	if err := json.Unmarshal(body, &reserva); err != nil {
-		log.Fatal("Reserva no encontrada")
 		return models.Reserva{}
 	}
 
